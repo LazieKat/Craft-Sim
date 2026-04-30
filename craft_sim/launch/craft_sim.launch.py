@@ -1,7 +1,7 @@
 """Single launch file for the full spacecraft attitude control pipeline.
 
 Default parameters are tuned for a stable step response with the default
-inertia (Ixx=1, Iyy=2, Izz=3 kg·m²).  All values can be overridden on the
+inertia (Ixx=1, Iyy=2, Izz=3 kg·m^2).  All values can be overridden on the
 command line, e.g.:
     ros2 launch craft_sim craft_sim.launch.py att_kp:=3.0
 """
@@ -19,9 +19,9 @@ def declare(name: str, default: str, description: str) -> DeclareLaunchArgument:
 def generate_launch_description():
     args = [
         # Inertia
-        declare("ixx", "1.0",  "Moment of inertia Ixx (kg·m²)"),
-        declare("iyy", "2.0",  "Moment of inertia Iyy (kg·m²)"),
-        declare("izz", "3.0",  "Moment of inertia Izz (kg·m²)"),
+        declare("ixx", "1.0",  "Moment of inertia Ixx (kg·m^2)"),
+        declare("iyy", "2.0",  "Moment of inertia Iyy (kg·m^2)"),
+        declare("izz", "3.0",  "Moment of inertia Izz (kg·m^2)"),
         # Attitude PID
         declare("att_kp", "2.0",  "Attitude controller proportional gain"),
         declare("att_ki", "0.05", "Attitude controller integral gain"),
@@ -43,29 +43,29 @@ def generate_launch_description():
     nodes = [
         Node(
             package="craft_sim",
-            executable="simulator_node",
-            name="simulator_node",
+            executable="simulator",
+            name="simulator",
             output="screen",
             emulate_tty=True,
         ),
         Node(
             package="craft_sim",
-            executable="rate_controller_node",
-            name="rate_controller_node",
+            executable="rate_controller",
+            name="rate_controller",
             output="screen",
             emulate_tty=True,
         ),
         Node(
             package="craft_sim",
-            executable="attitude_controller_node",
-            name="attitude_controller_node",
+            executable="attitude_controller",
+            name="attitude_controller",
             output="screen",
             emulate_tty=True,
         ),
         Node(
             package="craft_sim",
-            executable="flight_controller_node.py",
-            name="flight_controller_node",
+            executable="commander.py",
+            name="attitude_controller",
             output="screen",
             emulate_tty=True,
             parameters=[{
@@ -83,8 +83,8 @@ def generate_launch_description():
         ),
         Node(
             package="craft_sim",
-            executable="visualizer_node.py",
-            name="visualizer_node",
+            executable="visualizer.py",
+            name="visualizer",
             output="screen",
             emulate_tty=True,
         ),

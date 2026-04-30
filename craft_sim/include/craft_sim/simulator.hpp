@@ -10,23 +10,20 @@
 namespace craft_sim
 {
 
-class SimulatorNode : public rclcpp::Node
+class Simulator : public rclcpp::Node
 {
 public:
-  explicit SimulatorNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+  explicit Simulator(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
   // ── State ──────────────────────────────────────────────────────────────────
-  // [0]=roll [1]=pitch [2]=yaw  (rad, ZYX aerospace convention)
-  std::array<double, 3> attitude_{0.0, 0.0, 0.0};
-  // [0]=wx [1]=wy [2]=wz  (rad/s, body frame)
-  std::array<double, 3> rates_{0.0, 0.0, 0.0};
+  std::array<double, 3> attitude_ {0.0, 0.0, 0.0};  // roll, pitch, yaw (rad)
+  std::array<double, 3> rates_    {0.0, 0.0, 0.0};  // body rates (rad/s)
+  std::array<double, 3> torque_   {0.0, 0.0, 0.0};  // latest commanded torque (N·m)
+  
+  double ixx_{1.0}, iyy_{2.0}, izz_{3.0};           // moments of inertia (kg.m^2)
 
-  // Latest commands — updated from subscriber callbacks
-  std::array<double, 3> torque_{0.0, 0.0, 0.0};
-  double ixx_{1.0}, iyy_{2.0}, izz_{3.0};
-
-  static constexpr double kDt = 0.01;  // 100 Hz
+  static constexpr double kDt = 0.01;               // 100 Hz
 
   // ── Physics ────────────────────────────────────────────────────────────────
   // Euler's equations: returns angular accelerations given current rates/torques

@@ -1,35 +1,35 @@
-#include "craft_sim/attitude_controller_node.hpp"
+#include "craft_sim/attitude_controller.hpp"
 
 #include <algorithm>
 
 namespace craft_sim
 {
 
-AttitudeControllerNode::AttitudeControllerNode(const rclcpp::NodeOptions & options)
-: Node("attitude_controller_node", options)
+AttitudeController::AttitudeController(const rclcpp::NodeOptions & options)
+: Node("attitude_controller", options)
 {
   using std::placeholders::_1;
 
   sub_params_ = create_subscription<craft_sim::msg::VehicleParams>(
-    "/vehicle_params", 10, std::bind(&AttitudeControllerNode::on_params, this, _1));
+    "/vehicle_params", 10, std::bind(&AttitudeController::on_params, this, _1));
 
   sub_desired_att_ = create_subscription<geometry_msgs::msg::Vector3>(
-    "/desired_attitude", 10, std::bind(&AttitudeControllerNode::on_desired_att, this, _1));
+    "/desired_attitude", 10, std::bind(&AttitudeController::on_desired_att, this, _1));
 
   sub_current_att_ = create_subscription<geometry_msgs::msg::Vector3>(
-    "/current_attitude", 10, std::bind(&AttitudeControllerNode::on_current_att, this, _1));
+    "/current_attitude", 10, std::bind(&AttitudeController::on_current_att, this, _1));
 
   pub_desired_rates_ = create_publisher<geometry_msgs::msg::Vector3>("/desired_rates", 10);
 
   auto period = std::chrono::duration<double>(kDt);
-  timer_ = create_wall_timer(period, std::bind(&AttitudeControllerNode::tick, this));
+  timer_ = create_wall_timer(period, std::bind(&AttitudeController::tick, this));
 
   RCLCPP_INFO(get_logger(), "Attitude controller started");
 }
 
 // ── Callbacks ────────────────────────────────────────────────────────────────
 
-void AttitudeControllerNode::on_params(const craft_sim::msg::VehicleParams::SharedPtr msg)
+void AttitudeController::on_params(const craft_sim::msg::VehicleParams::SharedPtr msg)
 {
   kp_ = msg->att_kp;
   ki_ = msg->att_ki;
@@ -37,17 +37,17 @@ void AttitudeControllerNode::on_params(const craft_sim::msg::VehicleParams::Shar
   ff_ = msg->att_ff;
 }
 
-void AttitudeControllerNode::on_desired_att(const geometry_msgs::msg::Vector3::SharedPtr msg)
+void AttitudeController::on_desired_att(const geometry_msgs::msg::Vector3::SharedPtr msg)
 {
   desired_att_ = {msg->x, msg->y, msg->z};
 }
 
-void AttitudeControllerNode::on_current_att(const geometry_msgs::msg::Vector3::SharedPtr msg)
+void AttitudeController::on_current_att(const geometry_msgs::msg::Vector3::SharedPtr msg)
 {
   current_att_ = {msg->x, msg->y, msg->z};
 }
 
-void AttitudeControllerNode::tick()
+void AttitudeController::tick()
 {
   geometry_msgs::msg::Vector3 out;
 
@@ -74,7 +74,7 @@ void AttitudeControllerNode::tick()
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<craft_sim::AttitudeControllerNode>());
+  rclcpp::spin(std::make_shared<craft_sim::AttitudeController>());
   rclcpp::shutdown();
   return 0;
 }

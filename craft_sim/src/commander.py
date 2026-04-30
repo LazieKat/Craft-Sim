@@ -37,7 +37,12 @@ _SLIDERS = {
         ("Kd", "rate_kd",  0.0,  5.0,  0.5),
         ("FF", "rate_ff",  0.0,  2.0,  0.0),
     ],
-    "Inertia Tensor (kg·m²)": [
+    "Rate Limits": [
+        ("Roll (deg/s)", "rate_limit_roll",  0.0, 50.0, 10.0),
+        ("Pitch (deg/s)", "rate_limit_pitch",  0.0, 50.0, 10.0),
+        ("Yaw (deg/s)", "rate_limit_yaw",  0.0, 50.0,  10.0),
+    ],
+    "Inertia Tensor (kg·m^2)": [
         ("Ixx", "ixx",  0.1, 10.0, 1.0),
         ("Iyy", "iyy",  0.1, 10.0, 2.0),
         ("Izz", "izz",  0.1, 10.0, 3.0),
@@ -49,7 +54,7 @@ _SLIDERS = {
 
 class FlightControllerNode(Node):
     def __init__(self):
-        super().__init__("flight_controller_node")
+        super().__init__("attitude_controller")
         self._pub_att    = self.create_publisher(Vector3,       "/desired_attitude", 10)
         self._pub_params = self.create_publisher(VehicleParams, "/vehicle_params",   10)
 
@@ -71,6 +76,9 @@ class FlightControllerNode(Node):
         p.rate_kp = vals["rate_kp"]
         p.rate_kd = vals["rate_kd"]
         p.rate_ff = vals["rate_ff"]
+        p.rate_limit_roll = vals["rate_limit_roll"]
+        p.rate_limit_pitch = vals["rate_limit_pitch"]
+        p.rate_limit_yaw = vals["rate_limit_yaw"]
         self._pub_params.publish(p)
 
 

@@ -24,7 +24,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 # ── C++ nodes ─────────────────────────────────────────────────────────────────
-foreach(node simulator_node rate_controller_node attitude_controller_node)
+foreach(node simulator rate_controller attitude_controller)
   add_executable(${node} src/${node}.cpp)
   target_include_directories(${node} PRIVATE include)
   ament_target_dependencies(${node} rclcpp geometry_msgs)
@@ -33,11 +33,9 @@ foreach(node simulator_node rate_controller_node attitude_controller_node)
 endforeach()
 
 # ── Python package ────────────────────────────────────────────────────────────
-ament_python_install_package(craft_sim_viz)
-
 install(PROGRAMS
-  craft_sim_viz/visualizer_node.py
-  craft_sim_viz/flight_controller_node.py
+  src/visualizer.py
+  src/commander.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

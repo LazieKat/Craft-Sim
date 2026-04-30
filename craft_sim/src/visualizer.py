@@ -78,7 +78,7 @@ class _Signals(QObject):
 
 class VisualizerNode(Node):
     def __init__(self, signals: _Signals):
-        super().__init__("visualizer_node")
+        super().__init__("visualizer")
         self._sig = signals
         self.create_subscription(Vector3, "/current_attitude", self._on_att, 10)
         self.create_subscription(Vector3, "/current_rates",    self._on_rates, 10)
@@ -161,6 +161,9 @@ class MainWindow(QMainWindow):
         colors   = [(255, 80,  80), (80, 200,  80), (80, 120, 255),
                     (255, 160, 80), (80, 220, 200), (200, 80, 255)]
 
+        Ylimits  = [(-180, 180), (-180, 180), (-180, 180),
+                    (-10, 80), (-10, 80), (-10, 80)]
+
         self._curves: list[pg.PlotDataItem] = []
         self._bufs: list[deque] = [deque(maxlen=self.MAX_PTS) for _ in range(6)]
         self._tbuf: deque = deque(maxlen=self.MAX_PTS)
@@ -171,6 +174,7 @@ class MainWindow(QMainWindow):
             plot = plot_widget.addPlot(row=row, col=col, title=label)
             plot.setLabel("bottom", "t (s)")
             plot.showGrid(x=True, y=True, alpha=0.3)
+            plot.setYRange(*Ylimits[idx])
             curve = plot.plot(pen=pg.mkPen(color=color, width=2))
             self._curves.append(curve)
 

@@ -9,14 +9,17 @@
 namespace craft_sim
 {
 
-class RateControllerNode : public rclcpp::Node
+class RateController : public rclcpp::Node
 {
 public:
-  explicit RateControllerNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+  explicit RateController(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
   // Gains
   double kp_{10.0}, kd_{0.5}, ff_{0.0};
+
+  // Rate limits
+  std::array<double, 3> rate_limits_{10.0, 10.0, 10.0};
 
   // Latest inputs
   std::array<double, 3> desired_rates_{0.0, 0.0, 0.0};

@@ -18,10 +18,10 @@ inline double wrap_angle(double a)
   return a;
 }
 
-class AttitudeControllerNode : public rclcpp::Node
+class AttitudeController : public rclcpp::Node
 {
 public:
-  explicit AttitudeControllerNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+  explicit AttitudeController(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
   // Gains

@@ -1,33 +1,33 @@
-#include "craft_sim/simulator_node.hpp"
+#include "craft_sim/simulator.hpp"
 
 #include <algorithm>
 
 namespace craft_sim
 {
 
-SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
-: Node("simulator_node", options)
+Simulator::Simulator(const rclcpp::NodeOptions & options)
+: Node("simulator", options)
 {
   using std::placeholders::_1;
 
   sub_params_ = create_subscription<craft_sim::msg::VehicleParams>(
-    "/vehicle_params", 10, std::bind(&SimulatorNode::on_params, this, _1));
+    "/vehicle_params", 10, std::bind(&Simulator::on_params, this, _1));
 
   sub_torque_ = create_subscription<geometry_msgs::msg::Vector3>(
-    "/torque_commands", 10, std::bind(&SimulatorNode::on_torque, this, _1));
+    "/torque_commands", 10, std::bind(&Simulator::on_torque, this, _1));
 
   pub_attitude_ = create_publisher<geometry_msgs::msg::Vector3>("/current_attitude", 10);
   pub_rates_    = create_publisher<geometry_msgs::msg::Vector3>("/current_rates",    10);
 
   auto period = std::chrono::duration<double>(kDt);
-  timer_ = create_wall_timer(period, std::bind(&SimulatorNode::tick, this));
+  timer_ = create_wall_timer(period, std::bind(&Simulator::tick, this));
 
   RCLCPP_INFO(get_logger(), "Simulator started at %.0f Hz", 1.0 / kDt);
 }
 
 // ── Physics helpers ──────────────────────────────────────────────────────────
 
-std::array<double, 3> SimulatorNode::angular_accel(
+std::array<double, 3> Simulator::angular_accel(
   const std::array<double, 3> & w,
   const std::array<double, 3> & tau) const
 {
@@ -40,7 +40,7 @@ std::array<double, 3> SimulatorNode::angular_accel(
   };
 }
 
-std::array<double, 3> SimulatorNode::euler_rates(
+std::array<double, 3> Simulator::euler_rates(
   const std::array<double, 3> & angles,
   const std::array<double, 3> & w) const
 {
@@ -60,7 +60,7 @@ std::array<double, 3> SimulatorNode::euler_rates(
   };
 }
 
-void SimulatorNode::rk4_step()
+void Simulator::rk4_step()
 {
   // Full state: x = [phi, theta, psi, wx, wy, wz]
   // f(x) = [euler_rates(angles, w) | angular_accel(w, tau)]
@@ -106,19 +106,19 @@ void SimulatorNode::rk4_step()
 
 // ── Callbacks ────────────────────────────────────────────────────────────────
 
-void SimulatorNode::on_params(const craft_sim::msg::VehicleParams::SharedPtr msg)
+void Simulator::on_params(const craft_sim::msg::VehicleParams::SharedPtr msg)
 {
   ixx_ = (msg->ixx > 0.0) ? msg->ixx : ixx_;
   iyy_ = (msg->iyy > 0.0) ? msg->iyy : iyy_;
   izz_ = (msg->izz > 0.0) ? msg->izz : izz_;
 }
 
-void SimulatorNode::on_torque(const geometry_msgs::msg::Vector3::SharedPtr msg)
+void Simulator::on_torque(const geometry_msgs::msg::Vector3::SharedPtr msg)
 {
   torque_ = {msg->x, msg->y, msg->z};
 }
 
-void SimulatorNode::tick()
+void Simulator::tick()
 {
   rk4_step();
 
@@ -140,7 +140,7 @@ void SimulatorNode::tick()
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<craft_sim::SimulatorNode>());
+  rclcpp::spin(std::make_shared<craft_sim::Simulator>());
   rclcpp::shutdown();
   return 0;
 }
